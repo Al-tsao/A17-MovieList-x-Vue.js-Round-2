@@ -6,26 +6,29 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MovieList-Vue</title>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css">
 </head>
 
 <body>
   <div id="app">
     <!-- navigation -->
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
-      <a class="navbar-brand" href="./index.html">Movie List</a>
+      <a class="navbar-brand" href="#" style="cursor: default;">Movie List</a>
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
         aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav mr-auto">
-          <li class="nav-item active">
-            <a class="nav-link">Home
+          <li class="nav-item" v-bind:class="{active:visibility==='home'}">
+            <a class="nav-link" v-on:click="showMovies(), setVisibility('home')" style="cursor: pointer;">Home
               <span class="sr-only">(current)</span>
             </a>
           </li>
-          <li class="nav-item">
-            <a class="nav-link">favorite</a>
+          <li class="nav-item" v-bind:class="{active:visibility==='favorite'}">
+            <a class="nav-link" v-on:click="showFavoriteMovies(), setVisibility('favorite')"
+              style="cursor: pointer;">favorite</a>
+            <!-- v-on:click="showFavoriteMovies," -->
           </li>
         </ul>
       </div>
@@ -45,6 +48,9 @@
       <!-- data-panel -->
       <div class="container mt-5">
         <div class="row" id="data-panel">
+          <div v-show="!favoriteMovies.length && visibility==='favorite'">
+            <h1>最愛電影清單目前空白</h1>
+          </div>
           <!-- print movie list here -->
           <div class="col-sm-3" v-for="movie in filteredMovies">
             <div class="card mb-2">
@@ -53,42 +59,55 @@
                 <h5 class="card-title">{{movie.title}}</h5>
               </div>
               <!-- "More" button -->
-              <div class="card-footer">
-                <button class="btn btn-primary btn-show-movie" data-toggle="modal" data-target="#show-movie-modal"
-                  v-on:click="detail(movie)">More</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <!-- Modal -->
-      <div class="modal fade" id="show-movie-modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle"
-        aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title" id="show-movie-title">{{movieDetail.title}}</h5>
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">×</span>
-              </button>
-            </div>
-            <div class="modal-body" id="show-movie-body">
-              <div class="row">
-                <img class="col-sm-8" v-bind:src="movieDetail.image" id="show-movie-image">
-                <div class="col-sm-4">
-                  <p><em id="show-movie-date">release at : {{movieDetail.release_date}}</em></p>
-                  <p id="show-movie-description">{{movieDetail.description}}</p>
+              <div class="card-footer" style="display: flex; justify-content: space-between;">
+                <div class="card-footer-part">
+                  <button class="btn btn-primary btn-show-movie" data-toggle="modal" data-target="#show-movie-modal"
+                    v-on:click="detail(movie)">More</button>
+                  <button class="btn btn-info" v-on:click="addToFavorite(movie)"><i class="fas fa-plus"
+                      style="font-size: 10px;"></i></button>
                 </div>
+                <div class="card-footer-part">
+                  <button class="btn btn-outline-dark" disabled style="opacity: 1;border-width: 0;"
+                    v-show="movieInFavorite(movie)"><i class=" fas fa-heart" style="font-size: 25px;"></i></button>
+                  <button class="btn btn-danger" v-show="movieInFavorite(movie)"
+                    v-on:click="removeFromFavorite(movie)"><i class="fas fa-minus"
+                      style="font-size: 10px;"></i></button>
+                </div>
+
               </div>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
             </div>
           </div>
         </div>
       </div>
-
     </div>
+    <!-- Modal -->
+    <div class=" modal fade" id="show-movie-modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle"
+      aria-hidden="true">
+      <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="show-movie-title">{{movieDetail.title}}</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">×</span>
+            </button>
+          </div>
+          <div class="modal-body" id="show-movie-body">
+            <div class="row">
+              <img class="col-sm-8" v-bind:src="movieDetail.image" id="show-movie-image">
+              <div class="col-sm-4">
+                <p><em id="show-movie-date">release at : {{movieDetail.release_date}}</em></p>
+                <p id="show-movie-description">{{movieDetail.description}}</p>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
 
   </div><!-- #app -->
   <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>

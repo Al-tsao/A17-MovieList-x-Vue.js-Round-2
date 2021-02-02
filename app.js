@@ -9,17 +9,67 @@ new Vue({
     filteredMovies: [],
     searchMovies: "",
     movieDetail: {},
+    favoriteMovies: [],
+    visibility: 'home',
+    active: 'active',
+    NoMoviesInFavorite: true,
   },
   methods: {
+    setVisibility(visibility) {
+      this.visibility = visibility;
+    },
     handleSearchClicked(event) {
       event.preventDefault()
-      const keyword = this.searchMoives.trim().toLowerCase()
-      this.filteredMovies = this.movies.filter(movie => movie.title.toLowerCase().includes(keyword))
+      if (this.visibility === "favorite") {
+        const keyword = this.searchMovies.trim().toLowerCase()
+        const moviesLength = this.favoriteMovies.filter(movie => movie.title.toLowerCase().includes(keyword)).length
+        if (!moviesLength) {
+          console.log("此電影不在最愛清單中")
+          this.filteredMovies = [...this.favoriteMovies]
+          return alert("此電影不在最愛清單中")
+        }
+        this.filteredMovies = this.favoriteMovies.filter(movie => movie.title.toLowerCase().includes(keyword))
+      } else {
+        const keyword = this.searchMovies.trim().toLowerCase()
+        const moviesLength = this.movies.filter(movie => movie.title.toLowerCase().includes(keyword)).length
+        if (!moviesLength) {
+          console.log("此電影不在清單中")
+          this.filteredMovies = [...this.movies]
+          return alert("此電影不在清單中")
+        }
+        this.filteredMovies = this.movies.filter(movie => movie.title.toLowerCase().includes(keyword))
+
+      }
     },
     detail(movie) {
       this.movieDetail = movie
       console.log(this.movieDetail)
-    }
+    },
+    addToFavorite(movie) {
+      if (this.favoriteMovies.includes(movie)) {
+        return alert("此部電影已經在最愛清單中")
+      }
+      this.favoriteMovies.push(movie)
+    },
+    removeFromFavorite(movie) {
+      this.favoriteMovies = this.favoriteMovies.filter(favoriteMovie => {
+        return favoriteMovie !== movie
+      })
+      if (this.visibility === 'favorite') {
+        this.showFavoriteMovies()
+      }
+    },
+    movieInFavorite(movie) {
+      if (this.favoriteMovies.includes(movie)) {
+        return true
+      }
+    },
+    showFavoriteMovies() {
+      this.filteredMovies = [...this.favoriteMovies]
+    },
+    showMovies() {
+      this.filteredMovies = [...this.movies]
+    },
   },
   created() {
     //用 axios 接入 API 資料
@@ -34,7 +84,7 @@ new Vue({
           image: POSTER_URL + movie.image
         }));
         console.log(this.movies)
-        this.filteredMovies = this.movies.map(item => item);
+        this.filteredMovies = [...this.movies];
       })
       .catch((error) => console.log(error));
   }
